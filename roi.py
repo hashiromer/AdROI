@@ -12,7 +12,64 @@ def simulate_roi(n, alpha, beta, theta, lambda_, clv):
     return roi
 
 st.set_page_config(layout="wide")
-st.title('Campaign Performance Simulator')
+
+# Beautiful header
+st.markdown(
+    """
+    <style>
+    .header {
+        font-size: 36px;
+        font-weight: bold;
+        color: #f63366;  /* Use the slider color */
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .subheader {
+        font-size: 20px;
+        font-weight: normal;
+        color: #555555;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    .explanation {
+        font-size: 16px;
+        color: white;
+        margin-bottom: 20px;
+    }
+    .contact {
+        font-size: 16px;
+        color: #888888;
+        text-align: center;
+        margin-top: 40px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown('<div class="header">Campaign Performance Simulator</div>', unsafe_allow_html=True)
+st.markdown('<div class="subheader">Simulate and visualize the performance of your marketing campaigns</div>', unsafe_allow_html=True)
+
+# Method explanation
+st.markdown(
+    """
+    <div class="explanation">
+    A website visitor either converts with a certain probability or doesn't. If the user converts, we get the customer lifetime value (CLV) minus the cost per click (CPC). If the user doesn't convert, we just pay the CPC. We can calculate the revenue of a campaign over time by adding up these numbers for all web traffic funneled by the campaign.
+    <br><br>
+    This uses some simplifying assumptions which are not true in the actual world:
+    <ul>
+        <li>CPC and conversion probability of a visitor are independent.</li>
+        <li>CPC of all visitors are independent of each other which can cause diminishing returns </li>
+        <li>Does not estimate incremental revenue.</li>
+        <li>Multiple platforms or campaigns might assist a conversion.</li>
+        <li>Does not account for seasonality or trends.</li>
+        <li>....</li>
+    </ul>
+    So only use this as a starting point but let me know if you have any suggestions or improvements!
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Sidebar for parameters
 st.sidebar.header('Simulation Parameters')
@@ -21,8 +78,8 @@ beta = st.sidebar.slider('Beta (Beta Distribution)', 1, 100, 97)
 theta = st.sidebar.slider('Theta (Gamma Distribution)', 1, 20, 10)
 lambda_ = st.sidebar.slider('Lambda (Gamma Distribution)', 0.1, 1.0, 0.5)
 clv = st.sidebar.number_input('Customer Lifetime Value', value=60)
-N = st.sidebar.number_input('Number of Time Steps', value=100)
-k = st.sidebar.number_input('Number of Time Series', value=150)
+N = st.sidebar.number_input('Number of Visits', value=100)
+k = st.sidebar.number_input('Number of simulations', value=150)
 
 # Distribution plots
 st.header('Parameter Distributions')
@@ -33,7 +90,7 @@ with col1:
     x_beta = np.linspace(0, 1, 1000)
     y_beta = stats.beta.pdf(x_beta, alpha, beta)
     fig_beta = go.Figure(go.Scatter(x=x_beta, y=y_beta, mode='lines', fill='tozeroy'))
-    fig_beta.update_layout(title='Beta Distribution', xaxis_title='Value', yaxis_title='Density')
+    fig_beta.update_layout(title='Beta Distribution', xaxis_title='Conversion Rate', yaxis_title='Probability Density')
     st.plotly_chart(fig_beta, use_container_width=True)
     beta_mean = alpha / (alpha + beta)
     st.markdown(f"**Average Conversion Rate: {beta_mean * 100:.2f}%**")
@@ -45,7 +102,7 @@ with col2:
     x_gamma = np.linspace(0, x_gamma_max, 1000)
     y_gamma = stats.gamma.pdf(x_gamma, a=theta, scale=1/lambda_)
     fig_gamma = go.Figure(go.Scatter(x=x_gamma, y=y_gamma, mode='lines', fill='tozeroy'))
-    fig_gamma.update_layout(title='Gamma Distribution', xaxis_title='Value', yaxis_title='Density')
+    fig_gamma.update_layout(title='Gamma Distribution', xaxis_title='Cost per Click', yaxis_title='Probability Density')
     st.plotly_chart(fig_gamma, use_container_width=True)
     gamma_mean = theta / lambda_
     st.markdown(f"**Average CPC Value: {gamma_mean:.4f}**")
@@ -95,3 +152,6 @@ if st.button('Run Simulation'):
 
 else:
     st.write("Click 'Run Simulation' to see results.")
+
+# Contact information
+st.markdown('<div class="contact">For suggestions, features, or bugs, contact me at mail.hashiromer.com</div>', unsafe_allow_html=True)
